@@ -3,10 +3,12 @@ package com.example.androidstudiofirebaseimageupload;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,7 +18,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.DexterActivity;
 import com.karumi.dexter.PermissionToken;
@@ -104,6 +113,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void uploadToFirebase(){
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setTitle("File Uploader");
+        dialog.show();
 
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference uploader = storage.getReference().child("image1");
+        uploader.putFile(filePath)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        dialog.dismiss();
+                        Toast.makeText(getApplicationContext(),"File Uploaded", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+                        float percent = (100 * snapshot.getBytesTransferred()) / snapshot.getTotalByteCount();
+                        dialog.setMessage("Uploaded: " + (int)percent + " %");
+                    }
+                });
     }
 }
