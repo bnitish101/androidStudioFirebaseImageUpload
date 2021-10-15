@@ -1,9 +1,14 @@
 package com.example.androidstudiofirebaseimageupload;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnBrowse, btnUpload;
     Uri filePath;
     Bitmap bitmap;
+    ActivityResultLauncher<String> mGetContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +40,12 @@ public class MainActivity extends AppCompatActivity {
         btnBrowse = (Button) findViewById(R.id.btnBrowse);
         btnUpload = (Button) findViewById(R.id.btnUpload);
 
+        mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
+            @Override
+            public void onActivityResult(Uri result) {
+                imageView.setImageURI(result);
+            }
+        });
         btnBrowse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -42,7 +54,11 @@ public class MainActivity extends AppCompatActivity {
                         .withListener(new PermissionListener() {
                             @Override
                             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-
+                                // deprecated
+                                // Intent intent = new Intent(Intent.ACTION_PICK);
+                                // intent.setType("image/*");
+                                // startActivityForResult(Intent.createChooser(intent,"Please Select Image"), 1);
+                                mGetContent.launch("image/*");
                             }
 
                             @Override
@@ -52,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-
+                                permissionToken.continuePermissionRequest();
                             }
                         }).check();
             }
