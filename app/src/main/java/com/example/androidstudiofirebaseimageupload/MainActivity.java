@@ -77,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
                         }).check();
             }
         });
+
+        btnUpload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadToFirebase();
+            }
+        });
     }
 
     @Override
@@ -94,5 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+    }
+
+    private void uploadToFirebase(){
+
     }
 }
